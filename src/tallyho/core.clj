@@ -1,16 +1,13 @@
 (ns tallyho.core
   (:use seesaw.core
         [clojure.string :only [join]])
-  (:import [javax.swing JTable JOptionPane]
-           javax.swing.table.DefaultTableModel
-           java.awt.event.MouseListener)
+  (:import [javax.swing JOptionPane]
+           javax.swing.table.DefaultTableModel)
   (:gen-class))
 
 (def table-model
      (proxy [DefaultTableModel] [(to-array-2d []) (object-array ["name" "score"])]
        (isCellEditable [row column] false)))
-
-(def s-table (JTable. table-model))
 
 (defn calculate-score [[calc & digits :as all] old]
   (let [old (Integer/parseInt (str old))
@@ -34,25 +31,18 @@
         (alert "Enter a real number, dude.")
         (recur old)))))
 
-(def on-click
-     (proxy [MouseListener] []
-       (mouseClicked
-        [e]
-        (let [row (.rowAtPoint s-table (.getPoint e))
-              score (.getValueAt s-table row 1)]
-          (when-let [new-score (calc-new-score score)]
-            (.setValueAt table-model new-score row 1))))
-       (mouseEntered  [_])
-       (mouseExited   [_])
-       (mousePressed  [_])
-       (mouseReleased [_])))
+(defn on-table-click
+  [e]
+  (let [s-table (to-widget e)
+        row (.rowAtPoint s-table (.getPoint e))
+        score (.getValueAt s-table row 1)]
+    (when-let [new-score (calc-new-score score)]
+      (.setValueAt table-model new-score row 1))))
 
 (def score-table
-     (doto s-table
-       (.setFillsViewportHeight true)
-       (.addMouseListener on-click)))
-
-(def selection-model (.getSelectionModel score-table))
+  (doto (table :model table-model 
+               :listen [:mouse-clicked on-table-click])
+    (.setFillsViewportHeight true)))
 
 (def scroll-pane (scrollable score-table))
 
@@ -61,9 +51,14 @@
    table-model
    (object-array [(JOptionPane/showInputDialog "Enter the player's name.") "0"])))
 
+(defn delete-user [e]
+  (when-let [row (selection score-table)]
+    (.removeRow table-model row)))
+
 (def menus
-     (let [add-user (action :handler add-user :name "Add User")]
-       (menubar :items [(menu :text "Tallyho" :items [add-user])])))
+    (let [add-user (action :handler add-user :name "Add User")
+          delete-user (action :handler delete-user :name "Delete User")]
+      (menubar :items [(menu :text "Tallyho" :items [add-user delete-user])])))
 
 (def main-panel
      (mig-panel
