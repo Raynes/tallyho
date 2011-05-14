@@ -53,7 +53,10 @@
     (.removeRow table-model row)))
 
 (defn reset-scores [e]
-  (when (= 0 (JOptionPane/showConfirmDialog score-table "Are you sure?"))
+  (when (= JOptionPane/YES_OPTION (JOptionPane/showConfirmDialog
+                                   score-table
+                                   "Are you sure?" "Seriously?"
+                                   JOptionPane/YES_NO_OPTION))
     (doseq [row (range 0 (.getRowCount score-table))]
       (.setValueAt table-model 0 row 1))))
 
