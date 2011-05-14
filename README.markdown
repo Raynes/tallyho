@@ -10,6 +10,6 @@ I wrote this because my family and I play a lot of card games and such. Namely U
 
 I use cake as my build tool, but Leiningen should work. For best results, use cake.
 
-To build the source, run `cake deps && cake uberjar`. This will build a jar called `tallyho.jar`. You can then run the application with a `java -jar tallyho.jar`.
+You can build tallyho by running `cake bin`. That'll set up an executable you can run with `./tallyho`.
 
 Once I get it in a more completed state, I'll post some downloads for the less technically inclined.
