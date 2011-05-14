@@ -2,7 +2,8 @@
   (:use seesaw.core
         [clojure.string :only [join]])
   (:import [javax.swing JOptionPane]
-           javax.swing.table.DefaultTableModel)
+           javax.swing.table.DefaultTableModel
+           java.awt.event.MouseEvent)
   (:gen-class))
 
 (def table-model
@@ -33,18 +34,18 @@
 
 (defn on-table-click
   [e]
-  (let [s-table (to-widget e)
-        row (.rowAtPoint s-table (.getPoint e))
-        score (.getValueAt s-table row 1)]
-    (when-let [new-score (calc-new-score score)]
-      (.setValueAt table-model new-score row 1))))
+  (when (and (= (.getButton e) MouseEvent/BUTTON1) (= 2 (.getClickCount e)))
+    (let [s-table (to-widget e)
+          row (.rowAtPoint s-table (.getPoint e))
+          score (.getValueAt s-table row 1)]
+      (when-let [new-score (calc-new-score score)]
+        (.setValueAt table-model new-score row 1)))))
 
-(def score-table
+(defn make-score-table [pop]
   (doto (table :model table-model 
-               :listen [:mouse-clicked on-table-click])
+               :listen [:mouse-clicked on-table-click]
+               :popup pop)
     (.setFillsViewportHeight true)))
-
-(def scroll-pane (scrollable score-table))
 
 (defn add-user [e]
   (.addRow
@@ -55,10 +56,17 @@
   (when-let [row (selection score-table)]
     (.removeRow table-model row)))
 
-(def menus
-    (let [add-user (action :handler add-user :name "Add User")
-          delete-user (action :handler delete-user :name "Delete User")]
-      (menubar :items [(menu :text "Tallyho" :items [add-user delete-user])])))
+(def add-user-action (action :handler add-user :name "Add User"))
+
+(def delete-user-action (action :handler delete-user :name "Delete User"))
+
+(def score-table (make-score-table (fn [e] [add-user-action delete-user-action])))
+
+(def scroll-pane (scrollable score-table))
+
+(def menus (menubar :items
+                    [(menu :text "Tallyho"
+                           :items [add-user-action delete-user-action])]))
 
 (def main-panel
      (mig-panel
