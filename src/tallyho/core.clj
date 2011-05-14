@@ -1,7 +1,7 @@
 (ns tallyho.core
   (:use seesaw.core
         [clojure.string :only [join]])
-  (:import [javax.swing JOptionPane]
+  (:import [javax.swing JOptionPane JTable]
            javax.swing.table.DefaultTableModel
            java.awt.event.MouseEvent)
   (:gen-class))
@@ -41,11 +41,7 @@
       (when-let [new-score (calc-new-score score)]
         (.setValueAt table-model new-score row 1)))))
 
-(defn make-score-table [pop]
-  (doto (table :model table-model 
-               :listen [:mouse-clicked on-table-click]
-               :popup pop)
-    (.setFillsViewportHeight true)))
+(declare score-table)
 
 (defn add-user [e]
   (.addRow
@@ -56,22 +52,36 @@
   (when-let [row (selection score-table)]
     (.removeRow table-model row)))
 
+(defn reset-scores [e]
+  (when (= 0 (JOptionPane/showConfirmDialog score-table "Are you sure?"))
+    (doseq [row (range 0 (.getRowCount score-table))]
+      (.setValueAt table-model 0 row 1))))
+
 (def add-user-action (action :handler add-user :name "Add User"))
 
 (def delete-user-action (action :handler delete-user :name "Delete User"))
 
-(def score-table (make-score-table (fn [e] [add-user-action delete-user-action])))
+(def reset-scores-action (action :handler reset-scores :name "Reset Scores"))
+
+(def score-table
+     (doto
+         (table :model table-model 
+                :listen [:mouse-clicked on-table-click]
+                :popup (fn [e] [add-user-action delete-user-action
+                                reset-scores-action]))
+       (.setFillsViewportHeight true)))
 
 (def scroll-pane (scrollable score-table))
 
 (def menus (menubar :items
                     [(menu :text "Tallyho"
-                           :items [add-user-action delete-user-action])]))
+                           :items [add-user-action delete-user-action
+                                   reset-scores-action])]))
 
 (def main-panel
      (mig-panel
-      :constraints ["ins 0"]
-      :items [[scroll-pane ""]]))
+      :constraints ["fill, ins 0"]
+      :items [[scroll-pane "grow"]]))
 
 (defn -main [& args]
   (invoke-now
