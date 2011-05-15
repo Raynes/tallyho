@@ -22,7 +22,10 @@
   (when-not (empty? s) s))
 
 (defn calc-new-score [old]
-  (when-let [new-score (validate (JOptionPane/showInputDialog "Enter -number or +number."))]
+  (when-let [new-score
+             (validate
+              (JOptionPane/showInputDialog
+               "Enter -number to decrease score.\nEnter either +number or number to increase score."))]
     
     (if-let [result (try
                       (calculate-score new-score old)
