@@ -47,11 +47,10 @@
 (declare score-table)
 
 (defn add-user [e]
-  (let [user (JOptionPane/showInputDialog "Enter the player's name.")]
-    (when-not (empty? user)
-      (.addRow
-       table-model
-       (object-array [user "0"])))))
+  (when-let [user (validate (JOptionPane/showInputDialog "Enter the player's name."))]
+    (.addRow
+     table-model
+     (object-array [user "0"]))))
 
 (defn delete-user [e]
   (when-let [row (selection score-table)]
