@@ -54,26 +54,36 @@
   (when-let [row (selection score-table)]
     (.removeRow table-model row)))
 
+(defn confirm []
+  (= JOptionPane/YES_OPTION
+     (JOptionPane/showConfirmDialog
+      score-table
+      "Are you sure?" "Seriously?"
+      JOptionPane/YES_NO_OPTION)))
+
 (defn reset-scores [e]
-  (when (= JOptionPane/YES_OPTION (JOptionPane/showConfirmDialog
-                                   score-table
-                                   "Are you sure?" "Seriously?"
-                                   JOptionPane/YES_NO_OPTION))
+  (when (confirm)
     (doseq [row (range 0 (.getRowCount score-table))]
       (.setValueAt table-model 0 row 1))))
 
-(def add-user-action (action :handler add-user :name "Add User"))
+(defn reset-game [e]
+  (when (confirm)
+    (.setRowCount table-model 0)))
 
-(def delete-user-action (action :handler delete-user :name "Delete User"))
+(def add-user-action (action :handler add-user :name "Add Player"))
+
+(def delete-user-action (action :handler delete-user :name "Delete Player"))
 
 (def reset-scores-action (action :handler reset-scores :name "Reset Scores"))
+
+(def reset-game-action (action :handler reset-game :name "Remove All Players"))
 
 (def score-table
      (doto
          (table :model table-model 
                 :listen [:mouse-clicked on-table-click]
                 :popup (fn [e] [add-user-action delete-user-action
-                                reset-scores-action])
+                                reset-scores-action reset-game-action])
                 :font "ARIAL-PLAIN-14")
        (.setFillsViewportHeight true)
        (.setRowHeight 20)))
@@ -83,7 +93,7 @@
 (def menus (menubar :items
                     [(menu :text "Tallyho"
                            :items [add-user-action delete-user-action
-                                   reset-scores-action])]))
+                                   reset-scores-action reset-game-action])]))
 
 (def main-panel
      (mig-panel
@@ -95,5 +105,5 @@
    (frame
     :title "TallyHOOOOOOO"
     :content main-panel
-    :on-close :exit
+    :on-close :dispose
     :menubar menus)))
