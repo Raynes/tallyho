@@ -36,10 +36,10 @@
   [e]
   (when (and (= (.getButton e) MouseEvent/BUTTON1) (= 2 (.getClickCount e)))
     (let [s-table (to-widget e)
-          row (.rowAtPoint s-table (.getPoint e))
-          score (.getValueAt s-table row 1)]
-      (when-let [new-score (calc-new-score score)]
-        (.setValueAt table-model new-score row 1)))))
+          row (.rowAtPoint s-table (.getPoint e))]
+      (when (>= row 0)
+        (when-let [new-score (calc-new-score (.getValueAt s-table row 1))]
+          (.setValueAt table-model new-score row 1))))))
 
 (declare score-table)
 
@@ -71,8 +71,10 @@
          (table :model table-model 
                 :listen [:mouse-clicked on-table-click]
                 :popup (fn [e] [add-user-action delete-user-action
-                                reset-scores-action]))
-       (.setFillsViewportHeight true)))
+                                reset-scores-action])
+                :font "ARIAL-PLAIN-14")
+       (.setFillsViewportHeight true)
+       (.setRowHeight 20)))
 
 (def scroll-pane (scrollable score-table))
 
