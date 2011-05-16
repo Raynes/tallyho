@@ -107,5 +107,5 @@
    (frame
     :title "TallyHOOOOOOO"
     :content main-panel
-    :on-close :dispose
+    :on-close :exit
     :menubar menus)))
