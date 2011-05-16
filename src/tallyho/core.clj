@@ -6,6 +6,8 @@
            java.awt.event.MouseEvent)
   (:gen-class))
 
+(native!)
+
 (def table-model
      (proxy [DefaultTableModel] [(to-array-2d []) (object-array ["name" "score"])]
        (isCellEditable [row column] false)))
