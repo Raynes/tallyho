@@ -27,13 +27,11 @@
               (JOptionPane/showInputDialog
                "Enter -number to decrease score.\nEnter either +number or number to increase score."))]
     
-    (if-let [result (try
-                      (calculate-score new-score old)
-                      (catch NumberFormatException e))]
-      result
-      (do
-        (alert "Enter a real number, dude.")
-        (recur old)))))
+    (or
+     (try (calculate-score new-score old)
+          (catch NumberFormatException e))
+     (do (alert "Enter a real number, dude.")
+         (recur old)))))
 
 (defn on-table-click
   [e]
